@@ -440,3 +440,227 @@ Element.implement({
 /* compatibility */
 
 Autocompleter.Base = Autocompleter;
+
+
+
+
+
+/**
+ * Autocompleter.Local
+ *
+ * http://digitarald.de/project/autocompleter/
+ *
+ * @version		1.1.2
+ *
+ * @license		MIT-style license
+ * @author		Harald Kirschner <mail [at] digitarald.de>
+ * @copyright	Author
+ */
+
+Autocompleter.Local = new Class({
+
+	Extends: Autocompleter,
+
+	options: {
+		minLength: 0,
+		delay: 200
+	},
+
+	initialize: function(element, tokens, options) {
+		this.parent(element, options);
+		this.tokens = tokens;
+	},
+
+	query: function() {
+		this.update(this.filter());
+	}
+
+});
+
+
+
+
+
+/**
+ * Autocompleter.Request
+ *
+ * http://digitarald.de/project/autocompleter/
+ *
+ * @version		1.1.2
+ *
+ * @license		MIT-style license
+ * @author		Harald Kirschner <mail [at] digitarald.de>
+ * @copyright	Author
+ */
+
+Autocompleter.Request = new Class({
+
+	Extends: Autocompleter,
+
+	options: {/*
+		indicator: null,
+		indicatorClass: null,
+		onRequest: $empty,
+		onComplete: $empty,*/
+		postData: {},
+		ajaxOptions: {},
+		postVar: 'value'
+
+	},
+
+	query: function(){
+		var data = $unlink(this.options.postData) || {};
+		data[this.options.postVar] = this.queryValue;
+		var indicator = $(this.options.indicator);
+		if (indicator) indicator.setStyle('display', '');
+		var cls = this.options.indicatorClass;
+		if (cls) this.element.addClass(cls);
+		this.fireEvent('onRequest', [this.element, this.request, data, this.queryValue]);
+		this.request.send({'data': data});
+	},
+
+	/**
+	 * queryResponse - abstract
+	 *
+	 * Inherated classes have to extend this function and use this.parent()
+	 */
+	queryResponse: function() {
+		var indicator = $(this.options.indicator);
+		if (indicator) indicator.setStyle('display', 'none');
+		var cls = this.options.indicatorClass;
+		if (cls) this.element.removeClass(cls);
+		return this.fireEvent('onComplete', [this.element, this.request]);
+	}
+
+});
+
+Autocompleter.Request.JSON = new Class({
+
+	Extends: Autocompleter.Request,
+
+	initialize: function(el, url, options) {
+		this.parent(el, options);
+		this.request = new Request.JSON($merge({
+			'url': url,
+			'link': 'cancel'
+		}, this.options.ajaxOptions)).addEvent('onComplete', this.queryResponse.bind(this));
+	},
+
+	queryResponse: function(response) {
+		this.parent();
+		this.update(response);
+	}
+
+});
+
+Autocompleter.Request.HTML = new Class({
+
+	Extends: Autocompleter.Request,
+
+	initialize: function(el, url, options) {
+		this.parent(el, options);
+		this.request = new Request.HTML($merge({
+			'url': url,
+			'link': 'cancel',
+			'update': this.choices
+		}, this.options.ajaxOptions)).addEvent('onComplete', this.queryResponse.bind(this));
+	},
+
+	queryResponse: function(tree, elements) {
+		this.parent();
+		if (!elements || !elements.length) {
+			this.hideChoices();
+		} else {
+			this.choices.getChildren(this.options.choicesMatch).each(this.options.injectChoice || function(choice) {
+				var value = choice.innerHTML;
+				choice.inputValue = value;
+				this.addChoiceEvents(choice.set('html', this.markQueryValue(value)));
+			}, this);
+			this.showChoices();
+		}
+
+	}
+
+});
+
+/* compatibility */
+
+Autocompleter.Ajax = {
+	Base: Autocompleter.Request,
+	Json: Autocompleter.Request.JSON,
+	Xhtml: Autocompleter.Request.HTML
+};
+
+
+
+
+
+/**
+ * Observer - Observe formelements for changes
+ *
+ * - Additional code from clientside.cnet.com
+ *
+ * @version		1.1
+ *
+ * @license		MIT-style license
+ * @author		Harald Kirschner <mail [at] digitarald.de>
+ * @copyright	Author
+ */
+var Observer = new Class({
+
+	Implements: [Options, Events],
+
+	options: {
+		periodical: false,
+		delay: 1000
+	},
+
+	initialize: function(el, onFired, options){
+		this.element = $(el) || $$(el);
+		this.addEvent('onFired', onFired);
+		this.setOptions(options);
+		this.bound = this.changed.bind(this);
+		this.resume();
+	},
+
+	changed: function() {
+		var value = this.element.get('value');
+		if ($equals(this.value, value)) return;
+		this.clear();
+		this.value = value;
+		this.timeout = this.onFired.delay(this.options.delay, this);
+	},
+
+	setValue: function(value) {
+		this.value = value;
+		this.element.set('value', value);
+		return this.clear();
+	},
+
+	onFired: function() {
+		this.fireEvent('onFired', [this.value, this.element]);
+	},
+
+	clear: function() {
+		$clear(this.timeout || null);
+		return this;
+	},
+
+	pause: function(){
+		if (this.timer) $clear(this.timer);
+		else this.element.removeEvent('keyup', this.bound);
+		return this.clear();
+	},
+
+	resume: function(){
+		this.value = this.element.get('value');
+		if (this.options.periodical) this.timer = this.changed.periodical(this.options.periodical, this);
+		else this.element.addEvent('keyup', this.bound);
+		return this;
+	}
+
+});
+
+var $equals = function(obj1, obj2) {
+	return (obj1 == obj2 || JSON.encode(obj1) == JSON.encode(obj2));
+};

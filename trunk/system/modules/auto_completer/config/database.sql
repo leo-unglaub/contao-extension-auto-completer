@@ -15,6 +15,7 @@ CREATE TABLE `tl_module` (
   `use_auto_completer` char(1) NOT NULL default '',
   `auto_completer_override_global` char(1) NOT NULL default '',
   `auto_completer_expert_settings` char(1) NOT NULL default '',
+  `auto_completer_language` varchar(250) NOT NULL default '',
   `auto_completer_min_length` int(5) NOT NULL default '0',
   `auto_completer_mark_query` varchar(10) NOT NULL default 'true',
   `auto_completer_width` varchar(250) NOT NULL default '',

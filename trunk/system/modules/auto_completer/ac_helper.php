@@ -1,13 +1,13 @@
 <?php if (!defined('TL_ROOT')) die('You can not access this file directly!');
 
 /**
- * TYPOlight webCMS
- * Copyright (C) 2005-2009 Leo Feyer
+ * TYPOlight Open Source CMS
+ * Copyright (C) 2005-2010 Leo Feyer
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation, either
- * version 2.1 of the License, or (at your option) any later version.
+ * version 3 of the License, or (at your option) any later version.
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,10 +16,10 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this program. If not, please visit the Free
- * Software Foundation website at http://www.gnu.org/licenses/.
+ * Software Foundation website at <http://www.gnu.org/licenses/>.
  *
  * PHP version 5
- * @copyright  leo@leo-unglaub.net, CyberSpectrum 2009 
+ * @copyright  LU-Hosting 2010, CyberSpectrum 2010
  * @author     Leo Unglaub <leo@leo-unglaub.net>, Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @package    auto_completer 
  * @license    GNU/GPL
@@ -38,7 +38,7 @@ class ac_helper extends Frontend
 	/* 
 	 * Experts parameters - when in experts mode.
 	 */
-	protected $lookupMap=array
+	protected $lookupMap = array
 		(
 			'auto_completer_min_length' 		=> 'minLength',
 			'auto_completer_max_choises' 		=> 'maxChoices',
@@ -72,7 +72,7 @@ class ac_helper extends Frontend
 	/* 
 	 * Basic parameters - not in experts mode.
 	 */
-	protected $lookupMapBasicMode=array
+	protected $lookupMapBasicMode = array
 		(
 			'auto_completer_min_length'			=> 'minLength',
 			'auto_completer_max_choises'		=> 'maxChoices',
@@ -116,44 +116,41 @@ class ac_helper extends Frontend
 	 */	
 	public function getDefaultConfig($expertsmode=false)
 	{
-		if($GLOBALS['TL_CONFIG']['auto_completer_expert_settings'] || $expertsmode)
-		{
-			$settingsList = $this->lookupMap;
-		} else {
-			$settingsList = $this->lookupMapBasicMode;
-		}
-        
 		$data = array();
+
+		if($GLOBALS['TL_CONFIG']['auto_completer_expert_settings'] || $expertsmode)
+			$settingsList = $this->lookupMap;
+		else
+			$settingsList = $this->lookupMapBasicMode;
+        
 		foreach($settingsList as $setting => $alias)
-		{
 			$data[$setting] = $GLOBALS['TL_CONFIG'][$setting];
-		}
 
 		return $data;
 	}
 	
 	public function applyGlobalConfig($config=false)
 	{
-		$default=$this->getDefaultConfig();
+		$default = $this->getDefaultConfig();
 		if(!$config)
 			return $default;
-		// check what mode we are in, 
+
 		if(!$config['auto_completer_override_global'])
 		{
 			// If not overriding global, restrict all values to global ones.
 			foreach($this->lookupMap as $key=>$value)
-			{
 				$config[$key] = $default[$key];
-			}
-		} else {
+		} 
+		else
+		{
 			if(!$config['auto_completer_expert_settings'])
 			{
 				// If not expert, override all expert settings in config.
 				foreach($this->lookupMap as $key=>$value)
+				{
 					if(!array_key_exists($key, $this->lookupMapBasicMode))
-					{
 						$config[$key] = $default[$key];
-					}
+				}
 			}
 		}
 		return $config;
@@ -165,20 +162,19 @@ class ac_helper extends Frontend
 	 */
 	protected function generateJSForModule($arr)
 	{
-		// we have to read the dca config. for the FE
-		require_once('dca/tl_module.php');
-		
-		$arrSettings = array();
-		// get the defaults
 		$this->import('ac_helper');
-		$defaults=$this->scriptDefaults;
+		require_once('dca/tl_module.php');
+
+		$arrSettings = array();
+		$defaults = $this->scriptDefaults;
+
 		// give all for experts or only subset of settings for basic mode.
-		if($arr['auto_completer_expert_settings']) {
-			$settingsList=$this->lookupMap;
-		} else {
+		if($arr['auto_completer_expert_settings'])
+			$settingsList = $this->lookupMap;
+		else
 			$settingsList=$this->lookupMapBasicMode;
-		}
-		$arr=$this->applyGlobalConfig($arr);
+
+		$arr = $this->applyGlobalConfig($arr);
 
 		foreach($settingsList as $setting => $alias)
 		{
@@ -189,19 +185,19 @@ class ac_helper extends Frontend
 				$arr[$setting] = in_array($arr[$setting], array(1, 'true', true));
 
 			// correct incorrectly stored values to treat them as unchanged.
-			if(($default=='null' && ($arr[$setting]=='0' || $arr[$setting]=='')) || ($default=='{}' && $arr[$setting]==''))
-				$arr[$setting]=$default;
+			if(($default == 'null' && ($arr[$setting] == '0' || $arr[$setting] == '')) || ($default == '{}' && $arr[$setting] == ''))
+				$arr[$setting] = $default;
 
 			if($arr[$setting] != $default)
 			{
-				$quote=(($GLOBALS['TL_DCA']['tl_module']['fields'][$setting]['inputType']=='text') && (!is_numeric($arr[$setting])));
-				// changed option, is it text or not?
+				$quote = (($GLOBALS['TL_DCA']['tl_module']['fields'][$setting]['inputType'] == 'text') && (!is_numeric($arr[$setting])));
+
 				if($quote)
 				{
-					// add quotes
 					$arrSettings[] = $alias . ":'" . $arr[$setting] . "'";
-				} else {
-					// don't quote.
+				} 
+				else 
+				{
 					if(is_bool($arr[$setting]))
 						$arrSettings[] = $alias . ":" . ($arr[$setting] === true ? 'true' : 'false');
 					else
@@ -210,7 +206,7 @@ class ac_helper extends Frontend
 			}
 		}
 		// join it together.
-		return join(',', $arrSettings);
+		return implode(',', $arrSettings);
 	}
 	
 	/**
@@ -220,19 +216,15 @@ class ac_helper extends Frontend
 	 */
 	public function generateJavaScriptFor($arrOptions)
 	{
-		// inject JS code for lookup on search to page now.
-		// Einbinden der benörigten .js-files
-		$jsOptions=$this->generateJSForModule($arrOptions);
+		$jsOptions = $this->generateJSForModule($arrOptions);
 		if($jsOptions)
 			$jsOptions .=',';
-		$GLOBALS['TL_JAVASCRIPT'][] = 'system/modules/auto_completer/html/js/Autocompleter.js';
-		$GLOBALS['TL_JAVASCRIPT'][] = 'system/modules/auto_completer/html/js/Autocompleter.Local.js';
-		$GLOBALS['TL_JAVASCRIPT'][] = 'system/modules/auto_completer/html/js/Autocompleter.Request.js';
-		$GLOBALS['TL_JAVASCRIPT'][] = 'system/modules/auto_completer/html/js/Observer.js';
+
+		$GLOBALS['TL_JAVASCRIPT'][] = 'system/modules/auto_completer/html/js/ac_compress.js';
+
 		if($arrOptions['auto_completer_hook'])
-		{
 			$url = "'ajax.php?req_script=ac_auto_completer&hook=" . $arrOptions['auto_completer_hook'];
-		}
+		
 		// append url suffix if needed.
 		$url .= ($arrOptions['auto_completer_url_suffix'] ? '&' . $arrOptions['auto_completer_url_suffix'] : '') . "'";
 		
@@ -241,33 +233,35 @@ class ac_helper extends Frontend
 		"new Autocompleter.Request.JSON('" . $arrOptions['auto_completer_input_name'] . "'," . $url .
 		",{".$jsOptions."indicatorClass:'autocompleter-loading'});}); " . 
 		"/* ]]> */</script>";
-		// Einbinden der .css-Datei
+
 		$GLOBALS['TL_CSS'][] = 'system/modules/auto_completer/html/css/auto_completer.css';
 	}
 
 	/**
-	 * Callback from database.
+	 * Callback: prepare ignore words to save into the DB
+	 * 
 	 * @param string
 	 * @param object
 	 * @return string
 	 */
-	public function save_ignore_words($varValue, DataContainer $dc){		
-		// clean the array: remove double entries, empty values and whitespace
-		$tmp=array_diff(array_unique(array_map(trim, explode(',', $varValue))), array(''));
-		sort($tmp);
-		$ret_case_sensitive = join(',', $tmp);
-		$ret = strtolower($ret_case_sensitive);
-		return $ret;
+	public function save_ignore_words($varValue, DataContainer $dc)
+	{
+		// array_diff remove empty strings
+		$arrBuffer = array_diff(array_unique(array_map(trim, explode(',', $varValue))), array(''));
+		sort($arrBuffer);
+		$strBuffer = join(',', $arrBuffer);
+		return strtolower($strBuffer);
 	}
 
 	/**
-	 * Callback from database.
+	 * Callback: make ignore words better readable
+	 * 
 	 * @param string
 	 * @param object
 	 * @return string
 	 */
-	public function load_ignore_words($varValue, DataContainer $dc){
-		// modify the output for an better human usage
+	public function load_ignore_words($varValue, DataContainer $dc)
+	{
 		return str_replace(',', ', ', $varValue);
 	}
 	
@@ -279,13 +273,30 @@ class ac_helper extends Frontend
      * @param object
 	 * @return string
 	 */
-	public function set_missing_default_values($strValue, DataContainer $objDC) {
-		if (empty($strValue)) {
+	public function set_missing_default_values($strValue, DataContainer $objDC) 
+	{
+		if (empty($strValue))
 			$strValue = $GLOBALS['TL_DCA']['tl_settings']['fields'][$objDC->field]['default'];
-		}
-		
-		return $strValue;	
+
+		return $strValue;
 	}
-	
+
+	/**
+	 * return all active page languages as array
+	 * @return array
+	 */
+	public function getSiteLanguages()
+	{
+		$this->Import('Database');
+		$this->loadLanguageFile('languages');
+		$arrReturn = array();
+		
+		$objLang = $this->Database->prepare('SELECT DISTINCT language FROM tl_search_index')->execute();
+
+		while($objLang->next())
+			$arrReturn[$objLang->language] = $GLOBALS['TL_LANG']['LNG'][$objLang->language];
+		
+		return $arrReturn;
+	}
 }
 ?>
