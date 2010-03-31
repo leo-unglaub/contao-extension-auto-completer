@@ -40,9 +40,9 @@ class ac_auto_completer_searchform extends Frontend
 	 */
 	public function hook_search($strBuffer, $strTemplate)
 	{
-		if(count($GLOBALS['TL_CONFIG']['auto_completer']))
+		if(count($GLOBALS['TL_HOOKS']['auto_completer']))
 		{
-			foreach($GLOBALS['TL_CONFIG']['auto_completer'] as $key => $data)
+			foreach($GLOBALS['TL_HOOKS']['auto_completer'] as $key => $data)
 			{
 				// only process if there is a config hook.
 				// some search hooks don't have a config hook, if they are being generated from a module i.e.

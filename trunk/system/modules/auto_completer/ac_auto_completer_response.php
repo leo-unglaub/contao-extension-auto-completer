@@ -55,7 +55,7 @@ class ac_auto_completer_response extends Frontend
 	 */
 	protected function ac_response_hooked_keywords()
 	{
-		$hook = $GLOBALS['TL_CONFIG']['auto_completer'][$this->Input->get('hook')]['hooklookup'];
+		$hook = $GLOBALS['TL_HOOKS']['auto_completer'][$this->Input->get('hook')]['hooklookup'];
 
 		if(is_array($hook)) {
 			$this->import($hook[0]);

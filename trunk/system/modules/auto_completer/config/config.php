@@ -35,7 +35,7 @@
 	if(!isset($GLOBALS['TL_CONFIG']['auto_completer']))
         $GLOBALS['TL_CONFIG']['auto_completer'] = array();
 
-    $GLOBALS['TL_CONFIG']['auto_completer']['searchindex'] = array
+    $GLOBALS['TL_HOOKS']['auto_completer']['searchindex'] = array
     (
     	'hooklookup' => array('ac_search_index', 'keywords'),
     	'hookconfig' => array('ac_search_index', 'config'),
