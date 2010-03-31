@@ -79,7 +79,6 @@ class ac_auto_completer extends Module
 		$this->Template->matchAny = specialchars($GLOBALS['TL_LANG']['MSC']['matchAny']);
 		$this->Template->id = ($GLOBALS['TL_CONFIG']['disableAlias'] && $this->Input->get('id')) ? $this->Input->get('id') : false;
 		$this->Template->ac_scriptid = 'ac_keywords' . $this->id;
-		$this->Template->action = isset($href) ? $href : ampersand($this->Environment->request);
 
 		$arrConfig = $this->arrData;
 		$arrConfig['auto_completer_input_name'] = $this->Template->ac_scriptid;
@@ -93,6 +92,8 @@ class ac_auto_completer extends Module
 			if ($objNext->numRows)
 				$href = $this->generateFrontendUrl($objNext->fetchAssoc());
 		}
+		
+		$this->Template->action = isset($href) ? $href : ampersand($this->Environment->request);
 	}
 }
 
