@@ -103,39 +103,37 @@ class ac_search_index extends Frontend
 			}
 		
 			// check if there is a layout and fetch modules if so.
-			if ($objLayout->numRows)
-				$arrModules = deserialize($objLayout->modules);
-			else 
-				$arrModules = array();
+			($objLayout->numRows) ? $arrModules = deserialize($objLayout->modules) : $arrModules = array();
 
 			// fetch all content element modules from this page.
 			$objContent = $this->Database->prepare('SELECT module FROM tl_content WHERE pid IN (SELECT id FROM tl_article WHERE pid=?)')->execute($objPage->id);
 			
 			while($objContent->next())
-			{
 				$arrModules[] = array('mod' => $objContent->module);
-			
-			}
 
 			if (count($arrModules))
 			{
 				// now check each module if it is a search module and if wants to use the ajax functionality.
-				$ids=array();
+				$ids = array();
 				foreach ($arrModules as $arrModule)
-				{
 					$ids[] = $arrModule['mod'];
-				}
-				$objModules = $this->Database->prepare("SELECT * FROM tl_module WHERE id IN (" . join(', ', $ids) . ") AND type='search' AND use_auto_completer=1")
-											->execute();
+
+				$objModules = $this->Database->prepare('SELECT * FROM tl_module WHERE id IN (' . implode(', ', $ids) . ') AND type=\'search\' AND use_auto_completer=1')->execute();
 				define('use_auto_completer_hook_search_flag', true);
 				$this->import('ac_helper');
+				
 				while($objModules->next())
 				{
-					$arrConfig=$objModules->row();
-					// default typolight search boxes always have the id "keywords"
-					$arrConfig['auto_completer_input_name']='keywords';
-					$arrConfig['auto_completer_hook']='searchindex';
-					$arrConfig['auto_completer_url_suffix']= "searchmodid=" . $arrConfig['id'];
+					$arrConfig = $objModules->row();
+					
+					// default typolight search boxes always have the id "keywords" but not in TL 2.8 :(
+					if (version_compare('2.8.0', VERSION . '.' . BUILD, '<='))
+						$arrConfig['auto_completer_input_name'] = 'ctrl_keywords';
+					else
+						$arrConfig['auto_completer_input_name'] = 'keywords';
+
+					$arrConfig['auto_completer_hook'] = 'searchindex';
+					$arrConfig['auto_completer_url_suffix'] = 'searchmodid=' . $arrConfig['id'];
 					$this->ac_helper->generateJavaScriptFor($arrConfig);
 				}
 			}

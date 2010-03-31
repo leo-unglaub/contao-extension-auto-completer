@@ -249,7 +249,7 @@ class ac_helper extends Frontend
 		// array_diff remove empty strings
 		$arrBuffer = array_diff(array_unique(array_map(trim, explode(',', $varValue))), array(''));
 		sort($arrBuffer);
-		$strBuffer = join(',', $arrBuffer);
+		$strBuffer = implode(',', $arrBuffer);
 		return strtolower($strBuffer);
 	}
 
