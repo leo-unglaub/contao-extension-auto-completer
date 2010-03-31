@@ -46,7 +46,7 @@ class ac_auto_completer_searchform extends Frontend
 			{
 				// only process if there is a config hook.
 				// some search hooks don't have a config hook, if they are being generated from a module i.e.
-				if(is_array($data['hookconfig']) and array_key_exists('hookconfig', $data))
+				if(is_array($data['hookconfig']) && array_key_exists('hookconfig', $data))
 				{
 					$this->import($data['hookconfig'][0]);
 					$this->$data['hookconfig'][0]->$data['hookconfig'][1]();

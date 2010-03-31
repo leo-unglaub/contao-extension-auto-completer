@@ -57,8 +57,7 @@ class ac_auto_completer_response extends Frontend
 	{
 		$hook = $GLOBALS['TL_CONFIG']['auto_completer'][$this->Input->get('hook')]['hooklookup'];
 
-		// workarround for the debugger
-		if(true || is_array($hook)) {
+		if(is_array($hook)) {
 			$this->import($hook[0]);
 			$reply = $this->$hook[0]->$hook[1]();
 		} else {

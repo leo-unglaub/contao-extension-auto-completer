@@ -109,16 +109,7 @@ class ac_search_index extends Frontend
 				$arrModules = array();
 
 			// fetch all content element modules from this page.
-			$objContent = $this->Database->prepare('SELECT module FROM tl_content WHERE pid IN (SELECT id FROM tl_article WHERE pid=?)')
-										->execute($objPage->id);
-			
-			$GLOBALS['TL_DEBUG']['leo'][] = $objContent;
-			
-			while(true)
-			{
-				echo 'foo';
-			}
-			
+			$objContent = $this->Database->prepare('SELECT module FROM tl_content WHERE pid IN (SELECT id FROM tl_article WHERE pid=?)')->execute($objPage->id);
 			
 			while($objContent->next())
 			{
