@@ -54,10 +54,13 @@ class ac_search_index extends Frontend
 			if (version_compare('2.8.0', VERSION.'.'.BUILD, '<='))
 			{
 				$arrLanguage = deserialize($objBlacklist->auto_completer_language);
-				foreach ($arrLanguage as $k=>$v)
+				if (is_array($arrLanguage))
 				{
-					($k == '0') ? $sql .= ' AND ( language = \'' . $v . '\'' : $sql .= ' OR language = \'' . $v . '\'';
-					((count($arrLanguage) - 1) == $k) ? $sql .= ' OR language = \'' . $v . '\' ) ' : 'AND language = \'' . $v . '\'';
+					foreach ($arrLanguage as $k=>$v)
+					{
+						($k == '0') ? $sql .= ' AND ( language = \'' . $v . '\'' : $sql .= ' OR language = \'' . $v . '\'';
+						((count($arrLanguage) - 1) == $k) ? $sql .= ' OR language = \'' . $v . '\' ) ' : 'AND language = \'' . $v . '\'';
+					}
 				}
 			}
 
